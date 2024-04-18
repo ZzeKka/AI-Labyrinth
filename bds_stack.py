@@ -20,13 +20,3 @@ class stack:
             for element in self.stack_list:
                 print(f"| {element} |\n")
         print("\n")
-
-
-new_stack = stack()
-new_stack.display_queue()
-new_stack.stack_element(3)
-new_stack.stack_element(2)
-new_stack.stack_element(1)
-new_stack.display_queue()
-new_stack.remove_from_stack()
-new_stack.display_queue()
