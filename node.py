@@ -1,18 +1,19 @@
 '''File with Node strucure'''
 class Node:
     ''' Each Node represents a square of the maze '''
-    def __init__(self):
+    def __init__(self, value, position):
         '''
         Node Creation
 
         Attributes:
-            coordenates (tuple): x and y coordenates of the square in the maze
-            color (tuple): tuple containing the RGB values representing a color
-            explored (boolean): Store the node square was explored or not
+            coordenates (tuple): x and y coordenates of the square in the maze.
+            color (tuple): tuple containing the RGB values representing a color.
+            explored (boolean): Store the node square was explored or not.
+            adjacentens (list: nodes): List of Nodes that are acessible from previews node.
 
         '''
-        self.value = None
-        self.position = ()
+        self.value = value
+        self.position = position
         self.explored = False
         self.adjacents = []
 
