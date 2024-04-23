@@ -1,28 +1,27 @@
 '''File with Node strucure'''
 class Node:
     ''' Each Node represents a square of the maze '''
-    def __init__(self, value, position):
+    def __init__(self, state, action, cost, parent=None):
         '''
         Node Creation
 
         Attributes:
-            coordenates (tuple): x and y coordenates of the square in the maze.
-            color (tuple): tuple containing the RGB values representing a color.
-            explored (boolean): Store the node square was explored or not.
-            adjacentens (list: nodes): List of Nodes that are acessible from previews node.
-
+            state (tuple): represents the coordentes in matrix layout when travelling to this node.
+            action (str): represents the actions that can be made in these corrent node state.
+            cost (int): Cost to reach these path from initial mode.
+            parent (Node): Parent Node from were we travelled to reach these current node.
         '''
-        self.value = value
-        self.position = position
-        self.explored = False
-        self.adjacents = []
+        self.state = state
+        self.action = action
+        self.cost = cost
+        self.parent = parent
+        
 
     def __str__(self):
         '''
         Outputs Node information
         '''
-        return f'''These node is located at {self.position} with value of {self.value},
-            exploration status is {self.explored}'''
+        return f'''Current state of these node is {self.state}'''
 
     def __repr__(self):
-        return f'Node({self.value}, {self.position},  {self.explored})'
+        return f'Node({self.state}, {self.action})'

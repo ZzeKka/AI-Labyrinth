@@ -9,6 +9,7 @@ from time import sleep
 import pygame
 
 # 1st Party Libraries
+from frontier_stack import FrontierStack
 from node import Node
 
 # pylint: disable=no-member
@@ -23,15 +24,16 @@ GREEN = (34, 139, 34)
 ROSERED = (180, 75, 95)
 DARKGRAY = (69, 69, 69)
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
 DARKPURPLE = (48, 25, 52)
+LIGHTYELLOW = (255, 255, 191)
 
 # Block Coloring Grid
 grid_width_and_color = {
     "#": (0, DARKPURPLE),
     " ": (1, WHITE),
-    "A": (0, ROSERED),
+    "A": (0, ROSERED),  
     "B": (0, GREEN),
+    "*": (0, LIGHTYELLOW)
 }
 
 
@@ -57,12 +59,14 @@ class Maze:
     def __init__(self, filename: Path) -> None:
         with open(filename, mode="r", encoding="utf-8") as file:
             self.maze_layout = [list(line.rstrip("\n")) for line in file.readlines()]
+            if self.maze_layout.count('A') != 1:
+                raise ValueError("Maze-layout needs to have exactly on starting point (A)")
+            if self.maze_layout.count('B') != 1:
+                raise ValueError("Maze-layout needs to have exactly on goal point (B)")
             self.cols = len(self.maze_layout[0])
             self.rows = len(self.maze_layout)
-            self.begin_square_coordenates = self.find_coordenates('A')
-            self.end_square_coordenates = self.find_coordenates('B')
-            self.maze_graph = {}
-    
+            self.start_state = self.find_coordenates('A')
+            self.goal_state = self.find_coordenates('B')
 
     #Find coordenates a maze square
     def find_coordenates(self, unique_symbol) -> tuple:
@@ -82,15 +86,6 @@ class Maze:
                         return (x,y)
         else:
             raise ValueError("Method only alloed to search for unique symbols 'A' or 'B'")
-
-    #Create Path Graph
-    def build_graph(self, x, y, value, origin = 'none') -> list:
-        node = Node((x,y), value)
-        if(self.maze_layout[x+1][y]):
-            
-            return build_graph()
-        node.adjacents.append()
-
 
     def display_maze(self, screen) -> bool:
         """
@@ -140,9 +135,10 @@ class Maze:
                     pygame.draw.rect(window, GREEN, rect)
                 else:
                     raise ValueError("Invalid character in Matrix layout, Exiting")
-
-    
-
+                
+    def solve_maze(self, search_algorithm="dfs") -> None:
+        if(search_algorithm is "dfs"):
+            frontier = FrontierStack()
 
 
 def main() -> None:

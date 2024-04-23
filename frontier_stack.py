@@ -1,5 +1,5 @@
 ''' Stack '''
-class Stack:
+class FrontierStack:
     '''
     Stack data strucute.
 
@@ -29,7 +29,10 @@ class Stack:
         Parameters:
             element (Any): element to be added to the stack.    
         '''
-        self.stack_list.pop(0)
+        if self.get_length() is 0:
+            raise IndexError("Stack is Empty")
+        else:
+            self.stack_list.pop(0)
 
     def get_length(self) -> int:
         '''
