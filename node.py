@@ -1,7 +1,7 @@
 '''File with Node strucure'''
 class Node:
     ''' Each Node represents a square of the maze '''
-    def __init__(self, state, action, cost, parent=None):
+    def __init__(self, state, action=None, parent=None, cost=1):
         '''
         Node Creation
 

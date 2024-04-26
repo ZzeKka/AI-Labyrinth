@@ -1,4 +1,6 @@
 ''' Stack '''
+from node import Node
+
 class FrontierStack:
     '''
     Stack data strucute.
@@ -22,17 +24,17 @@ class FrontierStack:
         '''
         self.stack_list.append(element)
 
-    def remove_from_stack(self) -> None:
+    def remove_from_stack(self) -> Node:
         '''
         Adds element ot the stack
 
-        Parameters:
-            element (Any): element to be added to the stack.    
+        Return:
+            element (Node): returns removed element. 
         '''
         if self.get_length() is 0:
             raise IndexError("Stack is Empty")
         else:
-            self.stack_list.pop(0)
+            return self.stack_list.pop(0)
 
     def get_length(self) -> int:
         '''
@@ -43,7 +45,7 @@ class FrontierStack:
         '''
         return len(self.stack_list)
 
-    def display_queue(self) -> None:
+    def display_stack(self) -> None:
         '''
         Prints the current stack.
         If its empty print a message "Stack is Empty"  

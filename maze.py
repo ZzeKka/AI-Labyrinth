@@ -96,7 +96,6 @@ class Maze:
             screen (Surface): Complex variable from pygame with Width and height,
             that displays a screen.
         """
-
         keep_displaying = True
         while keep_displaying:
             sleep(0.1)
@@ -136,10 +135,51 @@ class Maze:
                 else:
                     raise ValueError("Invalid character in Matrix layout, Exiting")
                 
-    def solve_maze(self, search_algorithm="dfs") -> None:
+    def select_neighbour_squares(self, state) -> set:
+        row, col = state
+        candidates = [
+            ("up", (row - 1, col)),
+            ("down", (row + 1, col)),
+            ("left", (row, col - 1)),
+            ("right", (row, col + 1))
+        ]
+        neighbours = set()
+        for action, (x,y) in candidates:
+            if x < self.cols and y < self.rows and self.is_a_wall((x,y)):
+                neighbour_node = Node((x,y), action)
+                neighbours.add(neighbour_node)
+        return neighbours    
+                
+    def solve_maze(self, search_algorithm="dfs") -> list:
         if(search_algorithm is "dfs"):
             frontier = FrontierStack()
-
+            start_node = Node(self.start_state)
+            frontier.stack_element(start_node)
+            self.explored = set()
+            while True:
+                if frontier.get_length() == 0:
+                    raise ValueError("No solution found")
+                current_node = frontier.remove_from_stack()
+                if current_node.state == self.goal_state:
+                    return #solution
+                else:
+                    self.explored.add(current_node.state)
+                    neighbours = self.select_neighbour_squares(current_node.state) 
+                    for neighbour in neighbours:
+                        if neighbour not in frontier and neighbour.state not in self.explored:
+                            new_square_node = Node(state=neighbour.state, action=neighbour.action, parent=current_node)
+                            frontier.stack_element(new_square_node)
+                    frontier.remove_from_stack()
+    
+        
+    def is_a_wall(self, position) -> bool:
+        if len(position) != 2:
+            raise ValueError("Invalid location sent to check_walls function")
+        else:
+            if self.maze_layout[position[0]][position[1]] == '#':
+                return True
+            else:
+                return False
 
 def main() -> None:
     """
@@ -153,6 +193,20 @@ def main() -> None:
     maze.display_maze(screen)
     pygame.quit()
 
-
 if __name__ == "__main__":
     main()
+
+
+"""TODO"""
+### NEXT
+# finish #Solution in fucntion
+# Debug DFS algorithm
+# Make Pygame draw cycles
+
+### GLOBAL TASKS
+# COMPLETE DFS
+# COMPLETE BFS
+# COMPLETE GREEDY
+# COMPLETE A*
+
+
