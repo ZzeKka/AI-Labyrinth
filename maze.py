@@ -22,7 +22,7 @@ MAZE_SQUARESIZE = 40
 # Colors
 GREEN = (34, 139, 34)
 ROSERED = (180, 75, 95)
-DARKGRAY = (69, 69, 69)
+LIGHTBLUE = (173, 216, 230)
 WHITE = (255, 255, 255)
 DARKPURPLE = (48, 25, 52)
 LIGHTYELLOW = (255, 255, 191)
@@ -33,6 +33,7 @@ grid_width_and_color = {
     " ": (1, WHITE),
     "A": (0, ROSERED),  
     "B": (0, GREEN),
+    "x": (0, LIGHTBLUE),
     "*": (0, LIGHTYELLOW)
 }
 
@@ -58,17 +59,23 @@ class Maze:
     """
     def __init__(self, filename: Path) -> None:
         with open(filename, mode="r", encoding="utf-8") as file:
-            self.maze_layout = [list(line.rstrip("\n")) for line in file.readlines()]
-            if self.maze_layout.count('A') != 1:
+            self.maze_layout = []
+            countA, countB = 0, 0
+            for line in file.readlines():
+                row = list(line.rstrip('\n'))
+                countA += row.count('A')
+                countB += row.count('B')
+                self.maze_layout.append(list(line.rstrip('\n')))
+            if countA != 1:
                 raise ValueError("Maze-layout needs to have exactly on starting point (A)")
-            if self.maze_layout.count('B') != 1:
+            if countB != 1:
                 raise ValueError("Maze-layout needs to have exactly on goal point (B)")
             self.cols = len(self.maze_layout[0])
             self.rows = len(self.maze_layout)
             self.start_state = self.find_coordenates('A')
             self.goal_state = self.find_coordenates('B')
 
-    #Find coordenates a maze square
+    # Find coordenates a maze square
     def find_coordenates(self, unique_symbol) -> tuple:
         '''
         Return the coordenates of a unique symbol, raises error if it isn't trying to find A or B
@@ -87,6 +94,7 @@ class Maze:
         else:
             raise ValueError("Method only alloed to search for unique symbols 'A' or 'B'")
 
+    '''
     def display_maze(self, screen) -> bool:
         """
         Functions that displays the screen where the Maze
@@ -105,6 +113,7 @@ class Maze:
                     keep_displaying = False
                     break
             pygame.display.update()
+    '''
 
     # Drawing functions for maze
     def draw_maze(self, window) -> None:
@@ -124,34 +133,28 @@ class Maze:
                     MAZE_SQUARESIZE,
                     MAZE_SQUARESIZE,
                 )
-                if self.maze_layout[x][y] == "#":
-                    pygame.draw.rect(window, DARKPURPLE, rect)
-                elif self.maze_layout[x][y] == " ":
-                    pygame.draw.rect(window, WHITE, rect, width=1)
-                elif self.maze_layout[x][y] == "A":
-                    pygame.draw.rect(window, ROSERED, rect)
-                elif self.maze_layout[x][y] == "B":
-                    pygame.draw.rect(window, GREEN, rect)
-                else:
+                try:
+                    width, color = grid_width_and_color[self.maze_layout[x][y]]
+                    pygame.draw.rect(window, color, rect, width)
+                except:
                     raise ValueError("Invalid character in Matrix layout, Exiting")
-                
+            
     def select_neighbour_squares(self, state) -> set:
         row, col = state
         candidates = [
             ("up", (row - 1, col)),
+            ("right", (row, col + 1)),
             ("down", (row + 1, col)),
-            ("left", (row, col - 1)),
-            ("right", (row, col + 1))
-        ]
+            ("left", (row, col - 1))   
+        ] 
         neighbours = set()
         for action, (x,y) in candidates:
-            if x < self.cols and y < self.rows and self.is_a_wall((x,y)):
-                neighbour_node = Node((x,y), action)
-                neighbours.add(neighbour_node)
-        return neighbours    
+            if x in range(0,self.rows) and y in range(0,self.cols) and not self.is_a_wall((x,y)):
+                neighbours.add(((x,y), action))
+        return neighbours
                 
-    def solve_maze(self, search_algorithm="dfs") -> list:
-        if(search_algorithm is "dfs"):
+    def solve_maze(self,screen, search_algorithm="dfs") -> list:
+        if search_algorithm == "dfs":
             frontier = FrontierStack()
             start_node = Node(self.start_state)
             frontier.stack_element(start_node)
@@ -163,15 +166,20 @@ class Maze:
                 if current_node.state == self.goal_state:
                     return #solution
                 else:
+                    if self.maze_layout[current_node.state[0]][current_node.state[1]] != 'A':
+                        self.maze_layout[current_node.state[0]][current_node.state[1]] = 'x'
                     self.explored.add(current_node.state)
-                    neighbours = self.select_neighbour_squares(current_node.state) 
-                    for neighbour in neighbours:
-                        if neighbour not in frontier and neighbour.state not in self.explored:
-                            new_square_node = Node(state=neighbour.state, action=neighbour.action, parent=current_node)
-                            frontier.stack_element(new_square_node)
-                    frontier.remove_from_stack()
-    
-        
+                    self.draw_maze(screen)
+                    sleep(0.5)
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            return
+                    neighbours = self.select_neighbour_squares(current_node.state)
+                    for state, action in neighbours:
+                        if not frontier.contains_state(state) and state not in self.explored:
+                            frontier.stack_element(Node(state=state, action=action, parent=current_node))
+                pygame.display.update()
+
     def is_a_wall(self, position) -> bool:
         if len(position) != 2:
             raise ValueError("Invalid location sent to check_walls function")
@@ -190,7 +198,8 @@ def main() -> None:
     screen = pygame.display.set_mode(
         (maze.cols * MAZE_SQUARESIZE, maze.rows * MAZE_SQUARESIZE)
     )
-    maze.display_maze(screen)
+    maze.solve_maze(screen, "dfs")
+    print(maze.maze_layout)
     pygame.quit()
 
 if __name__ == "__main__":
@@ -198,10 +207,8 @@ if __name__ == "__main__":
 
 
 """TODO"""
-### NEXT
-# finish #Solution in fucntion
-# Debug DFS algorithm
-# Make Pygame draw cycles
+### Next Tasks
+# Update documentation
 
 ### GLOBAL TASKS
 # COMPLETE DFS
