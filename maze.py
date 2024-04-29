@@ -25,7 +25,7 @@ ROSERED = (180, 75, 95)
 LIGHTBLUE = (173, 216, 230)
 WHITE = (255, 255, 255)
 DARKPURPLE = (48, 25, 52)
-LIGHTYELLOW = (255, 255, 191)
+LIGHTYELLOW = (255, 255, 237)
 
 # Block Coloring Grid
 grid_width_and_color = {
@@ -141,17 +141,19 @@ class Maze:
             
     def select_neighbour_squares(self, state) -> set:
         row, col = state
+        # The first index represents the first move direction
         candidates = [
             ("up", (row - 1, col)),
             ("right", (row, col + 1)),
             ("down", (row + 1, col)),
             ("left", (row, col - 1))   
         ] 
-        neighbours = set()
+        neighbours = []
         for action, (x,y) in candidates:
             if x in range(0,self.rows) and y in range(0,self.cols) and not self.is_a_wall((x,y)):
-                neighbours.add(((x,y), action))
-        return neighbours
+                neighbours.append(((x,y), action))
+        self.print_maze()
+        return list(reversed(neighbours))
                 
     def solve_maze(self,screen, search_algorithm="dfs") -> list:
         if search_algorithm == "dfs":
@@ -164,16 +166,28 @@ class Maze:
                     raise ValueError("No solution found")
                 current_node = frontier.remove_from_stack()
                 if current_node.state == self.goal_state:
-                    return #solution
+                    solution = []
+                    while True:
+                        if self.close_window_event():
+                            return
+                        current_node = current_node.parent
+                        if current_node.parent == None:
+                            break
+                        self.maze_layout[current_node.state[0]][current_node.state[1]] = '*'
+                        solution.append((current_node.state, current_node.action))
+                        sleep(0.5)
+                        print(self.maze_layout)
+                        self.draw_maze(screen)
+                        pygame.display.update()
+                    return list(reversed(solution))
                 else:
                     if self.maze_layout[current_node.state[0]][current_node.state[1]] != 'A':
                         self.maze_layout[current_node.state[0]][current_node.state[1]] = 'x'
                     self.explored.add(current_node.state)
                     self.draw_maze(screen)
                     sleep(0.5)
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            return
+                    if self.close_window_event():
+                        return
                     neighbours = self.select_neighbour_squares(current_node.state)
                     for state, action in neighbours:
                         if not frontier.contains_state(state) and state not in self.explored:
@@ -188,6 +202,23 @@ class Maze:
                 return True
             else:
                 return False
+        
+    # Print Maze
+    def print_maze(self) -> None:
+        '''
+        Prints each element of the maze in a readable way
+        '''
+        for row in self.maze_layout:
+            print("".join(row))
+        print() 
+                
+    @staticmethod   
+    def close_window_event() -> bool:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
+        return False
+
 
 def main() -> None:
     """
@@ -198,8 +229,11 @@ def main() -> None:
     screen = pygame.display.set_mode(
         (maze.cols * MAZE_SQUARESIZE, maze.rows * MAZE_SQUARESIZE)
     )
-    maze.solve_maze(screen, "dfs")
-    print(maze.maze_layout)
+    maze_solution = maze.solve_maze(screen, "dfs")
+    print(maze_solution)
+    while True:
+        if maze.close_window_event():
+            break
     pygame.quit()
 
 if __name__ == "__main__":
@@ -208,6 +242,7 @@ if __name__ == "__main__":
 
 """TODO"""
 ### Next Tasks
+# Solution
 # Update documentation
 
 ### GLOBAL TASKS
