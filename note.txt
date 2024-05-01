@@ -1,0 +1,9 @@
+"""TODO"""
+### Next Tasks
+# Update documentation
+# Starts BFS
+
+### GLOBAL TASKS
+# COMPLETE BFS
+# COMPLETE GREEDY
+# COMPLETE A*

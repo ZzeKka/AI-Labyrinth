@@ -2,14 +2,8 @@
 
 from node import Node
 
-
 class FrontierStack:
-    """
-    Stack data strucute.
-
-    Attributes:
-        stacklist (list): list of elemnts of the stack.
-    """
+    """Stack data strucute."""
 
     def __init__(self) -> None:
         """
@@ -20,7 +14,7 @@ class FrontierStack:
 
     def stack_element(self, element):
         """
-        Adds element ot the stack
+        Adds element to the stack
 
         Parameters:
             element (Any): element to be added to the stack.
@@ -29,7 +23,7 @@ class FrontierStack:
 
     def remove_from_stack(self) -> Node:
         """
-        Adds element ot the stack
+        Removes from the stack, most recent added
 
         Return:
             element (Node): returns removed element.
@@ -40,7 +34,7 @@ class FrontierStack:
 
     def get_length(self) -> int:
         """
-        Adds element ot the stack
+        return length of stack
 
         Returns:
             length (int): Current length of the stack.
