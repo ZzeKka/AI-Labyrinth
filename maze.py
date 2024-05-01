@@ -172,7 +172,7 @@ class Maze:
             search_algorithm (str): search algorithm to solve maze
 
         Returns:
-            solution (list): If theres a solution return list of moves else an empty list
+            solution_found (list): If theres a solution return list of moves else an empty list
         """
         solution_found = None
         if search_algorithm == "dfs":
@@ -273,6 +273,8 @@ def main() -> None:
         (maze.cols * MAZE_SQUARESIZE, maze.rows * MAZE_SQUARESIZE)
     )
     maze_solution = maze.solve_maze(screen, "dfs")
+    if maze_solution == []:
+        raise ValueError('No solution found')
     print(maze_solution)
     while True:
         if maze.close_window_event():
