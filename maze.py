@@ -10,6 +10,7 @@ import pygame
 
 # 1st Party Libraries
 from frontier_stack import FrontierStack
+from frontier_queue import FrontierQueue
 
 # from frontier_queue import FrontierQueue
 from node import Node
@@ -20,6 +21,9 @@ from node import Node
 
 # Size of each square of the Maze
 MAZE_SQUARESIZE = 40
+
+# Supported search Algorithms
+search_algorithms = {1: "dfs", 2: "bfs", 3: "greedy", 4: "A*"}
 
 # Colors
 GREEN = (34, 139, 34)
@@ -175,55 +179,66 @@ class Maze:
             solution_found (list): If theres a solution return list of moves else an empty list
         """
         solution_found = None
+        start_node = Node(self.start_state)
         if search_algorithm == "dfs":
             frontier = FrontierStack()
-            start_node = Node(self.start_state)
             frontier.stack_element(start_node)
-            # Cycle Where Maze is constantly Drawn and Updated to the screen
-            while True:
-                if frontier.get_length() == 0:
-                    raise ValueError("No solution found")
+        elif search_algorithm == "bfs":
+            frontier = FrontierQueue()
+            frontier.enqueue(start_node)
+        # Cycle Where Maze is constantly Drawn and Updated to the screen
+        while True:
+            if frontier.get_length() == 0:
+                raise ValueError("No solution found")
+            if search_algorithm == "dfs":
                 current_node = frontier.remove_from_stack()
-                # Follow parent node until solution
-                if current_node.state == self.goal_state:
-                    solution = []
-                    while True:
-                        if self.close_window_event():
-                            solution_found = []
-                            break
-                        current_node = current_node.parent
-                        if current_node.parent is None:
-                            break
-                        self.maze_layout[current_node.state[0]][
-                            current_node.state[1]
-                        ] = "*"
-                        solution.append((current_node.state, current_node.action))
-                        sleep(0.5)
-                        self.draw_maze(screen)
-                        pygame.display.update()
-                    solution_found = list(reversed(solution))
-                    break
+            elif search_algorithm == "bfs":
+                current_node = frontier.dequeue()
+            # Follow parent node until solution
+            if current_node.state == self.goal_state:
+                solution = []
+                while True:
+                    if self.close_window_event():
+                        solution_found = []
+                        break
+                    current_node = current_node.parent
+                    if current_node.parent is None:
+                        break
+                    self.maze_layout[current_node.state[0]][
+                        current_node.state[1]
+                    ] = "*"
+                    solution.append((current_node.state, current_node.action))
+                    sleep(0.5)
+                    self.draw_maze(screen)
+                    pygame.display.update()
+                solution_found = list(reversed(solution))
+                break
+            if (
+                self.maze_layout[current_node.state[0]][current_node.state[1]]
+                != "A"
+            ):
+                self.maze_layout[current_node.state[0]][current_node.state[1]] = "x"
+            self.explored.add(current_node.state)
+            self.draw_maze(screen)
+            sleep(0.5)
+            if self.close_window_event():
+                solution_found = []
+                break
+            neighbours = self.select_neighbour_squares(current_node.state)
+            for state, action in neighbours:
                 if (
-                    self.maze_layout[current_node.state[0]][current_node.state[1]]
-                    != "A"
+                    not frontier.contains_state(state)
+                    and state not in self.explored
                 ):
-                    self.maze_layout[current_node.state[0]][current_node.state[1]] = "x"
-                self.explored.add(current_node.state)
-                self.draw_maze(screen)
-                sleep(0.5)
-                if self.close_window_event():
-                    solution_found = []
-                    break
-                neighbours = self.select_neighbour_squares(current_node.state)
-                for state, action in neighbours:
-                    if (
-                        not frontier.contains_state(state)
-                        and state not in self.explored
-                    ):
+                    if search_algorithm == "dfs":
                         frontier.stack_element(
                             Node(state=state, action=action, parent=current_node)
                         )
-                pygame.display.update()
+                    elif search_algorithm == "bfs":
+                        frontier.enqueue(
+                            Node(state=state, action=action, parent=current_node)
+                        )
+            pygame.display.update()
         return solution_found if solution_found is not None else []
 
     # Checks a coordenate is a wall (a square were you can't move).
@@ -261,6 +276,17 @@ class Maze:
                 return True
         return False
 
+# Main Menu
+def display_menu() -> None:
+    """ Displays Menu to Select Search Algorithm """
+    print(
+        "Select Desired Search Algorithm by number\n_______________\n"
+        "1. Depth First Search\n"
+        "2. Breath First Search\n"
+        "3. Greedy Search\n"
+        "4. A*\n"
+        "5. Quit Program\n"
+    )
 
 # Main
 def main() -> None:
@@ -268,14 +294,20 @@ def main() -> None:
     Main function Were functions to draw and solve the maze are called.
     """
     pygame.init()
+    choice = 0
+    while choice not in range(1,5):
+        display_menu()
+        choice = int(input('Option: '))
+    search_algorithm = search_algorithms[choice]
     maze = Maze(Path("maze1.txt"))  # If file exists
     screen = pygame.display.set_mode(
         (maze.cols * MAZE_SQUARESIZE, maze.rows * MAZE_SQUARESIZE)
     )
-    maze_solution = maze.solve_maze(screen, "dfs")
+    if search_algorithm in ("dfs","bfs"):
+        maze_solution = maze.solve_maze(screen, search_algorithm)
     if maze_solution == []:
-        raise ValueError('No solution found')
-    print(maze_solution)
+        raise ValueError("No solution found")
+    print("Solution Steps: ", maze_solution)
     while True:
         if maze.close_window_event():
             break

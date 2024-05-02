@@ -1,5 +1,7 @@
 """ Queue """
 
+from node import Node
+
 class FrontierQueue:
     """Queue data strucute."""
 
@@ -19,14 +21,16 @@ class FrontierQueue:
         """
         self.queue_list.insert(0, element)
 
-    def dequeue(self) -> None:
+    def dequeue(self) -> Node:
         """
         Removes from the Queue, last index from Queue
 
         Return:
             element (Node): returns removed element.
         """
-        self.queue_list.pop()
+        if self.get_length() == 0:
+            raise IndexError("Stack is Empty")
+        return self.queue_list.pop()
 
     def get_length(self) -> int:
         """
@@ -56,3 +60,5 @@ class FrontierQueue:
             (bool) - true if the state is in any node in the queue
         """
         return any(node.state == state for node in self.queue_list)
+
+
